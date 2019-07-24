@@ -255,7 +255,6 @@ public class Procedures {
             }
 
             // Next even Hop
-            //nextHop(read, seen, nextA, nextB, rels, nodeCursor);
             for (int i = 1; i < distance; i++) {
 
                 // Combine next (after initial)
@@ -272,6 +271,10 @@ public class Procedures {
 
                     nextB[THREADS].forEach(l -> nextB[(int)(index.getAndIncrement() % THREADS)].add(l));
 
+                } else {
+                    for (int j = 0; j < THREADS; j++) {
+                        seen.or(nextB[j]);
+                    }
                 }
 
                 // Next even Hop
@@ -301,7 +304,7 @@ public class Procedures {
                     // Next odd Hop
                     for (int j = 0; j < THREADS; j++) {
                         nextB[j].clear();
-                        service.submit(new NextHop(db, log, nextB[j], nextA[j], types,ph));
+                        service.submit(new NextHop(db, log, nextB[j], nextA[j], types, ph));
                     }
 
                     // Wait until all have finished
