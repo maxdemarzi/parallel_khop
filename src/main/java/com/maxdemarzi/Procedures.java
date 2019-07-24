@@ -10,7 +10,6 @@ import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.*;
-import org.roaringbitmap.longlong.LongIterator;
 import org.roaringbitmap.longlong.Roaring64NavigableMap;
 
 import java.util.*;
@@ -34,9 +33,9 @@ public class Procedures {
     private static final int THREADS = Runtime.getRuntime().availableProcessors();
 
 
-    @Procedure(name = "com.maxdemarzi.knn", mode = Mode.READ)
-    @Description("com.maxdemarzi.knn(Node node, Long distance, List<String> relationshipTypes)")
-    public Stream<LongResult> knn(@Name("startingNode") Node startingNode, @Name(value = "distance", defaultValue = "1") Long distance,
+    @Procedure(name = "com.maxdemarzi.khops", mode = Mode.READ)
+    @Description("com.maxdemarzi.khops(Node node, Long distance, List<String> relationshipTypes)")
+    public Stream<LongResult> khops(@Name("startingNode") Node startingNode, @Name(value = "distance", defaultValue = "1") Long distance,
                                   @Name(value = "relationshipTypes", defaultValue = "[]") List<String> relationshipTypes) {
         if (distance < 1) return Stream.empty();
 
@@ -126,9 +125,9 @@ public class Procedures {
         }
     }
 
-    @Procedure(name = "com.maxdemarzi.knn2", mode = Mode.READ)
-    @Description("com.maxdemarzi.knn2(Node node, Long distance, List<String> relationshipTypes)")
-    public Stream<LongResult> knn2(@Name("startingNode") Node startingNode, @Name(value = "distance", defaultValue = "1") Long distance,
+    @Procedure(name = "com.maxdemarzi.khops2", mode = Mode.READ)
+    @Description("com.maxdemarzi.khops2(Node node, Long distance, List<String> relationshipTypes)")
+    public Stream<LongResult> khops2(@Name("startingNode") Node startingNode, @Name(value = "distance", defaultValue = "1") Long distance,
                                    @Name(value = "relationshipTypes", defaultValue = "[]") List<String> relationshipTypes) {
         if (distance < 1) return Stream.empty();
 
@@ -197,9 +196,9 @@ public class Procedures {
         }
     }
 
-    @Procedure(name = "com.maxdemarzi.parallel.knn2", mode = Mode.READ)
-    @Description("com.maxdemarzi.parallel.knn2(Node node, Long distance, List<String> relationshipTypes)")
-    public Stream<LongResult> parallelKnn2(@Name("startingNode") Node startingNode,
+    @Procedure(name = "com.maxdemarzi.parallel.khops2", mode = Mode.READ)
+    @Description("com.maxdemarzi.parallel.khops2(Node node, Long distance, List<String> relationshipTypes)")
+    public Stream<LongResult> parallelkhops2(@Name("startingNode") Node startingNode,
                                            @Name(value = "distance", defaultValue = "1") Long distance,
                                            @Name(value = "relationshipTypes", defaultValue = "[]") List<String> relationshipTypes) {
         if (distance < 1) return Stream.empty();
@@ -278,7 +277,7 @@ public class Procedures {
                 // Next even Hop
                 for (int j = 0; j < THREADS; j++) {
                     nextA[j].clear();
-                    service.submit(new NextNeighbors(db, log, nextA[j], nextB[j], types, ph));
+                    service.submit(new NextHop(db, log, nextA[j], nextB[j], types, ph));
                 }
 
                 // Wait until all have finished
@@ -302,7 +301,7 @@ public class Procedures {
                     // Next odd Hop
                     for (int j = 0; j < THREADS; j++) {
                         nextB[j].clear();
-                        service.submit(new NextNeighbors(db, log, nextB[j], nextA[j], types,ph));
+                        service.submit(new NextHop(db, log, nextB[j], nextA[j], types,ph));
                     }
 
                     // Wait until all have finished

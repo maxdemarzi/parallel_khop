@@ -13,7 +13,7 @@ import org.roaringbitmap.longlong.Roaring64NavigableMap;
 
 import java.util.concurrent.Phaser;
 
-public class NextNeighbors implements Runnable {
+public class NextHop implements Runnable {
     private final GraphDatabaseService db;
     private final Log log;
     private final Roaring64NavigableMap next;
@@ -21,8 +21,8 @@ public class NextNeighbors implements Runnable {
     private final int[] types;
     private Phaser ph;
 
-    public NextNeighbors(GraphDatabaseService db, Log log, Roaring64NavigableMap next,
-                         Roaring64NavigableMap current, int[] types, Phaser ph) {
+    public NextHop(GraphDatabaseService db, Log log, Roaring64NavigableMap next,
+                   Roaring64NavigableMap current, int[] types, Phaser ph) {
         this.db = db;
         this.log = log;
         this.next = next;

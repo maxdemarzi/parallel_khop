@@ -7,7 +7,7 @@ import org.neo4j.harness.TestServerBuilders;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class KNNTest {
+public class KHopsTest {
     private static ServerControls neo4j;
 
     @BeforeAll
@@ -24,7 +24,7 @@ public class KNNTest {
     }
 
     @Test
-    void shouldCountKNN()
+    void shouldCountkhops()
     {
         // In a try-block, to make sure we close the driver after the test
         try( Driver driver = GraphDatabase.driver( neo4j.boltURI() , Config.build().withoutEncryption().toConfig() ) )
@@ -35,7 +35,7 @@ public class KNNTest {
             Session session = driver.session();
 
             // When I use the procedure
-            StatementResult result = session.run( "MATCH (node:User{username:'User-1'}) WITH node CALL com.maxdemarzi.knn(node, 4) YIELD value RETURN value" );
+            StatementResult result = session.run( "MATCH (node:User{username:'User-1'}) WITH node CALL com.maxdemarzi.khops(node, 4) YIELD value RETURN value" );
 
             // Then I should get what I expect
             assertThat(result.single().get("value").asInt()).isEqualTo(4);
@@ -43,7 +43,7 @@ public class KNNTest {
     }
 
     @Test
-    void shouldCountKNNwithRelTypes()
+    void shouldCountkhopswithRelTypes()
     {
         // In a try-block, to make sure we close the driver after the test
         try( Driver driver = GraphDatabase.driver( neo4j.boltURI() , Config.build().withoutEncryption().toConfig() ) )
@@ -54,7 +54,7 @@ public class KNNTest {
             Session session = driver.session();
 
             // When I use the procedure
-            StatementResult result = session.run( "MATCH (node:User{username:'User-1'}) WITH node CALL com.maxdemarzi.knn(node, 4, ['KNOWS']) YIELD value RETURN value" );
+            StatementResult result = session.run( "MATCH (node:User{username:'User-1'}) WITH node CALL com.maxdemarzi.khops(node, 4, ['KNOWS']) YIELD value RETURN value" );
 
             // Then I should get what I expect
             assertThat(result.single().get("value").asInt()).isEqualTo(2);
@@ -62,7 +62,7 @@ public class KNNTest {
     }
 
     @Test
-    void shouldCountKNN2()
+    void shouldCountkhops2()
     {
         // In a try-block, to make sure we close the driver after the test
         try( Driver driver = GraphDatabase.driver( neo4j.boltURI() , Config.build().withoutEncryption().toConfig() ) )
@@ -73,7 +73,7 @@ public class KNNTest {
             Session session = driver.session();
 
             // When I use the procedure
-            StatementResult result = session.run( "MATCH (node:User{username:'User-1'}) WITH node CALL com.maxdemarzi.knn2(node, 4) YIELD value RETURN value" );
+            StatementResult result = session.run( "MATCH (node:User{username:'User-1'}) WITH node CALL com.maxdemarzi.khops2(node, 4) YIELD value RETURN value" );
 
             // Then I should get what I expect
             assertThat(result.single().get("value").asInt()).isEqualTo(4);
@@ -81,7 +81,7 @@ public class KNNTest {
     }
 
     @Test
-    void shouldCountKNN2withRelTypes()
+    void shouldCountkhops2withRelTypes()
     {
         // In a try-block, to make sure we close the driver after the test
         try( Driver driver = GraphDatabase.driver( neo4j.boltURI() , Config.build().withoutEncryption().toConfig() ) )
@@ -92,7 +92,7 @@ public class KNNTest {
             Session session = driver.session();
 
             // When I use the procedure
-            StatementResult result = session.run( "MATCH (node:User{username:'User-1'}) WITH node CALL com.maxdemarzi.knn2(node, 4, ['KNOWS']) YIELD value RETURN value" );
+            StatementResult result = session.run( "MATCH (node:User{username:'User-1'}) WITH node CALL com.maxdemarzi.khops2(node, 4, ['KNOWS']) YIELD value RETURN value" );
 
             // Then I should get what I expect
             assertThat(result.single().get("value").asInt()).isEqualTo(2);
@@ -100,7 +100,7 @@ public class KNNTest {
     }
 
     @Test
-    void shouldCountParallelKNN()
+    void shouldCountParallelkhops()
     {
         // In a try-block, to make sure we close the driver after the test
         try( Driver driver = GraphDatabase.driver( neo4j.boltURI() , Config.build().withoutEncryption().toConfig() ) )
@@ -111,7 +111,7 @@ public class KNNTest {
             Session session = driver.session();
 
             // When I use the procedure
-            StatementResult result = session.run( "MATCH (node:User{username:'User-1'}) WITH node CALL com.maxdemarzi.parallel.knn2(node, 4) YIELD value RETURN value" );
+            StatementResult result = session.run( "MATCH (node:User{username:'User-1'}) WITH node CALL com.maxdemarzi.parallel.khops2(node, 4) YIELD value RETURN value" );
 
             // Then I should get what I expect
             assertThat(result.single().get("value").asInt()).isEqualTo(4);
@@ -119,7 +119,7 @@ public class KNNTest {
     }
 
     @Test
-    void shouldCountParallelKNNwithRelTypes()
+    void shouldCountParallelkhopswithRelTypes()
     {
         // In a try-block, to make sure we close the driver after the test
         try( Driver driver = GraphDatabase.driver( neo4j.boltURI() , Config.build().withoutEncryption().toConfig() ) )
@@ -130,7 +130,7 @@ public class KNNTest {
             Session session = driver.session();
 
             // When I use the procedure
-            StatementResult result = session.run( "MATCH (node:User{username:'User-1'}) WITH node CALL com.maxdemarzi.parallel.knn2(node, 4, ['KNOWS']) YIELD value RETURN value" );
+            StatementResult result = session.run( "MATCH (node:User{username:'User-1'}) WITH node CALL com.maxdemarzi.parallel.khops2(node, 4, ['KNOWS']) YIELD value RETURN value" );
 
             // Then I should get what I expect
             assertThat(result.single().get("value").asInt()).isEqualTo(2);

@@ -1,5 +1,5 @@
-# Parallel k-NN
-Parallelizing k-NN in Neo4j
+# Parallel k-Hops
+Parallelizing k-Hops in Neo4j
 
 Instructions
 ------------ 
@@ -17,32 +17,32 @@ that can be copied to the `plugin` directory of your Neo4j instance.
 
 Restart your Neo4j Server. Your new Stored Procedures are available:
 
-    CALL com.maxdemarzi.knn(Node node, Long distance);
-    CALL com.maxdemarzi.knn(Node node, Long distance, List<String> relTypes);
-    CALL com.maxdemarzi.knn2(Node node, Long distance);
-    CALL com.maxdemarzi.knn2(Node node, Long distance, List<String> relTypes);
-    CALL com.maxdemarzi.parallel.knn2(Node node, Long distance);
-    CALL com.maxdemarzi.parallel.knn2(Node node, Long distance, List<String> relTypes);
+    CALL com.maxdemarzi.khops(Node node, Long distance);
+    CALL com.maxdemarzi.khops(Node node, Long distance, List<String> relTypes);
+    CALL com.maxdemarzi.khops2(Node node, Long distance);
+    CALL com.maxdemarzi.khops2(Node node, Long distance, List<String> relTypes);
+    CALL com.maxdemarzi.parallel.khops2(Node node, Long distance);
+    CALL com.maxdemarzi.parallel.khops2(Node node, Long distance, List<String> relTypes);
     
 Call them with:
         
     MATCH (node:MyNode {id:{some_id})) WITH node 
-    CALL com.maxdemarzi.knn(node, 3) YIELD value RETURN value;
+    CALL com.maxdemarzi.khops(node, 3) YIELD value RETURN value;
     
     MATCH (node:MyNode {id:{some_id})) WITH node 
-    CALL com.maxdemarzi.knn(node, 3, ['FRIENDS','KNOWS']) YIELD value RETURN value;
+    CALL com.maxdemarzi.khops(node, 3, ['FRIENDS','KNOWS']) YIELD value RETURN value;
     
     MATCH (node:MyNode {id:{some_id})) WITH node 
-    CALL com.maxdemarzi.knn2(node, 3) YIELD value RETURN value;
+    CALL com.maxdemarzi.khops2(node, 3) YIELD value RETURN value;
     
     MATCH (node:MyNode {id:{some_id})) WITH node 
-    CALL com.maxdemarzi.knn2(node, 3, ['FRIENDS','KNOWS']) YIELD value RETURN value;
+    CALL com.maxdemarzi.khops2(node, 3, ['FRIENDS','KNOWS']) YIELD value RETURN value;
     
     MATCH (node:MyNode {id:{some_id})) WITH node 
-    CALL com.maxdemarzi.parallel.knn2(node, 3) YIELD value RETURN value;
+    CALL com.maxdemarzi.parallel.khops2(node, 3) YIELD value RETURN value;
         
     MATCH (node:MyNode {id:{some_id})) WITH node 
-    CALL com.maxdemarzi.parallel.knn2(node, 3, ['FRIENDS','KNOWS']) YIELD value RETURN value;
+    CALL com.maxdemarzi.parallel.khops2(node, 3, ['FRIENDS','KNOWS']) YIELD value RETURN value;
 
     
         
