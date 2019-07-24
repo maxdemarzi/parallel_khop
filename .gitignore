@@ -1,3 +1,8 @@
+.idea
+parallel_knn.iml
+target
+
+
 # Compiled class file
 *.class
 
