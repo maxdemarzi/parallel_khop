@@ -225,12 +225,12 @@ public class Procedures {
 
             Phaser ph = new Phaser(1);
 
-            Roaring64NavigableMap[] nextA = new Roaring64NavigableMap[THREADS + 1];
-            Roaring64NavigableMap[] nextB = new Roaring64NavigableMap[THREADS + 1];
+            Roaring64NavigableMap[] nextOdd = new Roaring64NavigableMap[THREADS + 1];
+            Roaring64NavigableMap[] nextEven = new Roaring64NavigableMap[THREADS + 1];
 
             for (int i = 0; i < (THREADS + 1); ++i) {
-                nextA[i] = new Roaring64NavigableMap();
-                nextB[i] = new Roaring64NavigableMap();
+                nextOdd[i] = new Roaring64NavigableMap();
+                nextEven[i] = new Roaring64NavigableMap();
             }
 
             seen.add(startingNode.getId());
@@ -246,12 +246,12 @@ public class Procedures {
             if (types.length == 0) {
                 nodeCursor.allRelationships(rels);
                 while (rels.next()) {
-                    nextB[(int)(index.getAndIncrement() % THREADS)].add(rels.neighbourNodeReference());
+                    nextEven[(int)(index.getAndIncrement() % THREADS)].add(rels.neighbourNodeReference());
                 }
             } else {
                 RelationshipSelectionCursor typedRels = RelationshipSelections.allCursor(cursors, nodeCursor, types);
                 while (typedRels.next()) {
-                    nextB[(int)(index.getAndIncrement() % THREADS)].add(typedRels.otherNodeReference());
+                    nextEven[(int)(index.getAndIncrement() % THREADS)].add(typedRels.otherNodeReference());
                 }
             }
 
@@ -261,27 +261,27 @@ public class Procedures {
                 // Combine next (after initial)
                 if (i > 1) {
                     for (int j = 0; j < THREADS; j++) {
-                        nextB[THREADS].or(nextB[j]);
-                        nextB[j].clear();
+                        nextEven[THREADS].or(nextEven[j]);
+                        nextEven[j].clear();
                     }
 
                     // Redistribute next
                     index.set(0);
-                    nextB[THREADS].andNot(seen);
-                    seen.or(nextB[THREADS]);
+                    nextEven[THREADS].andNot(seen);
+                    seen.or(nextEven[THREADS]);
 
-                    nextB[THREADS].forEach(l -> nextB[(int)(index.getAndIncrement() % THREADS)].add(l));
+                    nextEven[THREADS].forEach(l -> nextEven[(int)(index.getAndIncrement() % THREADS)].add(l));
 
                 } else {
                     for (int j = 0; j < THREADS; j++) {
-                        seen.or(nextB[j]);
+                        seen.or(nextEven[j]);
                     }
                 }
 
                 // Next even Hop
                 for (int j = 0; j < THREADS; j++) {
-                    nextA[j].clear();
-                    service.submit(new NextHop(db, log, nextA[j], nextB[j], types, ph));
+                    nextOdd[j].clear();
+                    service.submit(new NextHop(db, log, nextOdd[j], nextEven[j], types, ph));
                 }
 
                 // Wait until all have finished
@@ -292,20 +292,20 @@ public class Procedures {
 
                     // Combine next
                     for (int j = 0; j < THREADS; j++) {
-                        nextA[THREADS].or(nextA[j]);
-                        nextA[j].clear();
+                        nextOdd[THREADS].or(nextOdd[j]);
+                        nextOdd[j].clear();
                     }
 
                     // Redistribute next
                     index.set(0);
-                    nextA[THREADS].andNot(seen);
-                    seen.or(nextA[THREADS]);
-                    nextA[THREADS].forEach(l -> nextA[(int)(index.getAndIncrement() % THREADS)].add(l));
+                    nextOdd[THREADS].andNot(seen);
+                    seen.or(nextOdd[THREADS]);
+                    nextOdd[THREADS].forEach(l -> nextOdd[(int)(index.getAndIncrement() % THREADS)].add(l));
 
                     // Next odd Hop
                     for (int j = 0; j < THREADS; j++) {
-                        nextB[j].clear();
-                        service.submit(new NextHop(db, log, nextB[j], nextA[j], types, ph));
+                        nextEven[j].clear();
+                        service.submit(new NextHop(db, log, nextEven[j], nextOdd[j], types, ph));
                     }
 
                     // Wait until all have finished
@@ -316,11 +316,11 @@ public class Procedures {
 
             if ((distance % 2) == 0) {
                 for (int j = 0; j < THREADS; j++) {
-                    seen.or(nextA[j]);
+                    seen.or(nextOdd[j]);
                 }
             } else {
                 for (int j = 0; j < THREADS; j++) {
-                    seen.or(nextB[j]);
+                    seen.or(nextEven[j]);
                 }
             }
 
