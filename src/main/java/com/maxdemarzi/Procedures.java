@@ -35,8 +35,9 @@ public class Procedures {
 
     @Procedure(name = "com.maxdemarzi.khops", mode = Mode.READ)
     @Description("com.maxdemarzi.khops(Node node, Long distance, List<String> relationshipTypes)")
-    public Stream<LongResult> khops(@Name("startingNode") Node startingNode, @Name(value = "distance", defaultValue = "1") Long distance,
-                                  @Name(value = "relationshipTypes", defaultValue = "[]") List<String> relationshipTypes) {
+    public Stream<LongResult> khops(@Name("startingNode") Node startingNode,
+                                    @Name(value = "distance", defaultValue = "1") Long distance,
+                                    @Name(value = "relationshipTypes", defaultValue = "[]") List<String> relationshipTypes) {
         if (distance < 1) return Stream.empty();
 
         if (startingNode == null) {
@@ -46,8 +47,8 @@ public class Procedures {
             RelationshipType[] types = new RelationshipType[relationshipTypes.size()];
             for (int i = 0; i < types.length; i++) {
                 types[i] = RelationshipType.withName(relationshipTypes.get(i));
-
             }
+
             Node node;
             // Initialize bitmaps for iteration
             Roaring64NavigableMap seen = new Roaring64NavigableMap();
@@ -147,8 +148,8 @@ public class Procedures {
             }
 
             Roaring64NavigableMap seen = new Roaring64NavigableMap();
-            Roaring64NavigableMap nextA = new Roaring64NavigableMap();
-            Roaring64NavigableMap nextB = new Roaring64NavigableMap();
+            Roaring64NavigableMap nextOdd = new Roaring64NavigableMap();
+            Roaring64NavigableMap nextEven = new Roaring64NavigableMap();
 
             seen.add(startingNode.getId());
 
@@ -163,30 +164,30 @@ public class Procedures {
             if (types.length == 0) {
                 nodeCursor.allRelationships(rels);
                 while (rels.next()) {
-                    nextB.add(rels.neighbourNodeReference());
+                    nextEven.add(rels.neighbourNodeReference());
                 }
             } else {
                 RelationshipSelectionCursor typedRels = RelationshipSelections.allCursor(cursors, nodeCursor, types);
                 while (typedRels.next()) {
-                    nextB.add(typedRels.otherNodeReference());
+                    nextEven.add(typedRels.otherNodeReference());
                 }
             }
 
             for (int i = 1; i < distance; i++) {
                 // Next even Hop
-                nextHop(read, seen, nextA, nextB, rels, nodeCursor, types, cursors);
+                nextHop(read, seen, nextOdd, nextEven, rels, nodeCursor, types, cursors);
 
                 i++;
                 if (i < distance) {
                     // Next odd Hop
-                    nextHop(read, seen, nextB, nextA, rels, nodeCursor, types, cursors);
+                    nextHop(read, seen, nextEven, nextOdd, rels, nodeCursor, types, cursors);
                 }
             }
 
             if ((distance % 2) == 0) {
-                seen.or(nextA);
+                seen.or(nextOdd);
             } else {
-                seen.or(nextB);
+                seen.or(nextEven);
             }
 
             // remove starting node
