@@ -175,12 +175,12 @@ public class Procedures {
 
             for (int i = 1; i < distance; i++) {
                 // Next even Hop
-                nextHop(read, seen, nextOdd, nextEven, rels, nodeCursor, types, cursors);
+                nextHop(read, seen, nextOdd, nextEven, types, cursors);
 
                 i++;
                 if (i < distance) {
                     // Next odd Hop
-                    nextHop(read, seen, nextEven, nextOdd, rels, nodeCursor, types, cursors);
+                    nextHop(read, seen, nextEven, nextOdd, types, cursors);
                 }
             }
 
@@ -335,16 +335,15 @@ public class Procedures {
     }
 
     private void nextHop(Read read, Roaring64NavigableMap seen, Roaring64NavigableMap next,
-                         Roaring64NavigableMap current, RelationshipTraversalCursor rels,
-                         NodeCursor nodeCursor, int[] types, CursorFactory cursors) {
-        Iterator<Long> iterator;
+                         Roaring64NavigableMap current, int[] types, CursorFactory cursors) {
         current.andNot(seen);
         seen.or(current);
         next.clear();
+        RelationshipTraversalCursor rels = cursors.allocateRelationshipTraversalCursor();
+        NodeCursor nodeCursor = cursors.allocateNodeCursor();
 
-        iterator = current.iterator();
-        while (iterator.hasNext()) {
-            read.singleNode(iterator.next(), nodeCursor);
+        current.forEach(nodeId -> {
+            read.singleNode(nodeId, nodeCursor);
             nodeCursor.next();
 
             if (types.length == 0) {
@@ -358,7 +357,8 @@ public class Procedures {
                     next.add(typedRels.otherNodeReference());
                 }
             }
-
-        }
+        });
     }
+
 }
+

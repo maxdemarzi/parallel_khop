@@ -59,7 +59,6 @@ public class NextHop implements Runnable {
                         next.add(typedRels.otherNodeReference());
                     }
                 }
-
             });
         }
         ph.arriveAndDeregister();
